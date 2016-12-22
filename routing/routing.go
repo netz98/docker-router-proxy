@@ -115,7 +115,7 @@ func findContainerInProcesslist(hostname string) string {
 
 func getMatch(row, hostname string) string {
 	match := ""
-	re := regexp.MustCompile(" (?P<host>([0-9.]+)):(?P<port>[0-9]+)->([0-9]+)/tcp(.+)" + hostname)
+	re := regexp.MustCompile(" (?P<host>([0-9.]+)):(?P<port>[0-9]+)->(80|443)/tcp(.+)" + hostname)
 	matches := re.FindAllStringSubmatch(row, -1)
 	if matches != nil {
 		match = matches[0][1] + ":" + matches[0][3]
