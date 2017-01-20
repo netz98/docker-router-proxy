@@ -27,6 +27,7 @@ func main() {
 
 	// debugging?
 	if *debug {
+		fmt.Println("Version: 2.0.1")
 		fmt.Println("Domain:", *domain)
 		fmt.Println("Server will run on:", *port)
 	}
