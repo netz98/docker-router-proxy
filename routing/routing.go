@@ -53,14 +53,14 @@ func ResolveTargetContainer(r *http.Request, cache *Cache, debug bool, domain st
 	if !cache.hasCache(cacheKey) {
 
 		// fallback: exact match
-		container := findContainerInProcesslist(hostname)
+		container := findContainerInProcesslist(hostname, debug)
 		if "" == container {
 			// fallback 1: search for match with underscrores
-			container = findContainerInProcesslist(strings.Replace(hostname, "-", "_", -1))
+			container = findContainerInProcesslist(strings.Replace(hostname, "-", "_", -1), debug)
 
 			if "" == container {
 				// fallback 2: searhc for matches with dashes
-				container = findContainerInProcesslist(strings.Replace(hostname, "_", "-", -1))
+				container = findContainerInProcesslist(strings.Replace(hostname, "_", "-", -1), debug)
 			}
 		}
 
@@ -93,9 +93,17 @@ func ResolveTargetContainer(r *http.Request, cache *Cache, debug bool, domain st
 	return targetUrl
 }
 
-func findContainerInProcesslist(hostname string) string {
-	output, err := exec.Command("docker", "ps", "--filter=\"name=" + hostname + "\"").Output()
+func findContainerInProcesslist(hostname string, debug bool) string {
+
+	if debug {
+		fmt.Println("--> checking docker processlist for", hostname)
+	}
+
+	output, err := exec.Command("docker", "ps").Output()
 	if err != nil {
+		if debug {
+			fmt.Println("--> ERROR", err)
+		}
 		return ""
 	}
 	processlist := strings.Split(string(output), "\n")
@@ -106,8 +114,15 @@ func findContainerInProcesslist(hostname string) string {
 		// default container resolving without xdebug preference
 		container = getMatch(row, hostname)
 		if "" != container {
+			if debug {
+				fmt.Println("--> MATCH")
+			}
 			break
 		}
+	}
+
+	if debug && "" == container {
+		fmt.Println("--> NO MATCH")
 	}
 
 	return container
